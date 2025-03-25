@@ -1,0 +1,2 @@
+{'FVUSM_None': {'acc': '99.8476', 'avg_acc': '99.9682', 'eer': '0.0318'}}
+{'PLUSVein_LED': {'acc': '98.0556', 'avg_acc': '99.3403', 'eer': '0.9117'}, 'PLUSVein_LASER': {'acc': '99.1667', 'avg_acc': '99.2361', 'eer': '0.9031'}}
