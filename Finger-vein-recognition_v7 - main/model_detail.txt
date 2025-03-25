@@ -1,0 +1,32 @@
+(fingervein) PS C:\Users\msp\Desktop\Finger-vein-recognition_v6-1> python flops.py
+-------------------------------------------------------------------------
+      Layer (type)          Output Shape         Param #     Tr. Param #
+=========================================================================
+      PatchEmbed-1     [1, 32, 112, 112]             193             193
+      PatchEmbed-2       [1, 32, 56, 56]           1,440           1,440
+      BasicBlock-3       [1, 32, 56, 56]          23,942          23,942
+      PatchEmbed-4       [1, 64, 28, 28]           2,528           2,528
+      BasicBlock-5       [1, 64, 28, 28]          89,862          89,862
+      PatchEmbed-6       [1, 96, 14, 14]           7,040           7,040
+      BasicBlock-7       [1, 96, 14, 14]         197,766         197,766
+      BasicBlock-8       [1, 96, 14, 14]         197,766         197,766
+      BasicBlock-9       [1, 96, 14, 14]         197,766         197,766
+     PatchEmbed-10        [1, 128, 7, 7]          13,600          13,600
+     BasicBlock-11        [1, 128, 7, 7]         347,654         347,654
+   LinearModule-12              [1, 360]          46,696          46,696
+=========================================================================
+Total params: 1,126,253
+Trainable params: 1,126,253
+Non-trainable params: 0
+-------------------------------------------------------------------------
+[INFO] Register count_convNd() for <class 'torch.nn.modules.conv.Conv2d'>.
+[INFO] Register count_normalization() for <class 'torch.nn.modules.batchnorm.BatchNorm2d'>.
+[INFO] Register zero_ops() for <class 'torch.nn.modules.container.Sequential'>.
+[INFO] Register zero_ops() for <class 'torch.nn.modules.padding.ZeroPad2d'>.
+[INFO] Register zero_ops() for <class 'torch.nn.modules.dropout.Dropout'>.
+[INFO] Register count_softmax() for <class 'torch.nn.modules.activation.Softmax'>.
+[INFO] Register count_normalization() for <class 'torch.nn.modules.batchnorm.BatchNorm1d'>.
+[INFO] Register count_linear() for <class 'torch.nn.modules.linear.Linear'>.
+FLOPs: 0.3005 GFLOPs
+Params: 1.1247 M
+Computational complexity:       291.79 MMac

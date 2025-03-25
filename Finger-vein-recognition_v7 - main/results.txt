@@ -1,0 +1,7 @@
+0.1, 0.01
+{'FVUSM_None': {'acc': '99.84', 'avg_acc': '99.96', 'eer': '0.04'}}
+0.3, 0.01
+{'PLUSVein_LED': {'acc': '94.58', 'avg_acc': '98.99', 'eer': '1.14'}, 'PLUSVein_LASER': {'acc': '95.56', 'avg_acc': '98.85', 'eer': '1.18'}}
+
+FV-USM_compare_FV-DMHN
+{'FVUSM_compare_None': {'acc': '99.45', 'avg_acc': '99.88', 'eer': '0.13'}}
