@@ -51,10 +51,10 @@ EER (Equal Error Rate) :  1.09
 The model architectures proposed in this study are implemented using the PyTorchDL framework, and training is conducted on hardware featuring an Intel® Core™ i7-12700 CPU and Nvidia RTX 4080 graphics processing unit (GPU).
 
 # References： 
-> * 柯良頴, 夏至賢, 許良亦, 陳麒安, "Virtual Try-on Based on Composable Sequential Appearance Flow," ITAC, 2024.
-> [[Virtual Try-on Based on Composable Sequential Appearance Flow]](https://github.com/Anguschen1011/VirtualTryOn-VITON-V1)
-> * P. Li, Y. Xu, Y. Wei and Y. Yang, "Self-Correction for Human Parsing," _IEEE Transactions on Pattern Analysis and Machine Intelligence_, vol. 44, no. 6, pp. 3260-3271, 2022.
->[[Self Correction Human Parsing]](https://github.com/GoGoDuck912/Self-Correction-Human-Parsing)  
-> * N. Ravi, et al., "Sam 2: Segment anything in images and videos," _ArXiv_, 2024.
->[[StyleGAN-Human]](https://github.com/facebookresearch/segment-anything-2)
+> * C.-H. Hsia, L.-Y. Ke, and S.-T. Chen, “Improved lightweight convolutional neural network for finger vein recognition system,” _Bioengineering_, vol. 10, no. 8, pp. 919, 2023.
+> * [[ILCNN]](https://github.com/liangying-Ke/ILCNN)
+> * T.F. Zhang, et al., "Cas-vit: Convolutional additive self-attention vision transformers for efficient mobile applications," _ArXiv_ ,arXiv:2408.03703, 2024.
+> * [[CAS-ViT]](https://github.com/Tianfang-Zhang/CAS-ViT)
+> * Z. Yang, et al., "Comprehensive Competition Mechanism in Palmprint Recognition," _IEEE Transactions on Information Forensics and Security_, vol. 18, pp. 5160-5170, 2023.
+>[[CCNet]](https://github.com/Zi-YuanYang/CCNet)
 
