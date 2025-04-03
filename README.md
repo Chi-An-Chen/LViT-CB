@@ -52,9 +52,9 @@ The model architectures proposed in this study are implemented using the PyTorch
 
 # References： 
 > * C.-H. Hsia, L.-Y. Ke, and S.-T. Chen, “Improved lightweight convolutional neural network for finger vein recognition system,” _Bioengineering_, vol. 10, no. 8, pp. 919, 2023.
-> * [[ILCNN]](https://github.com/liangying-Ke/ILCNN)
+> [[GitHub]](https://github.com/liangying-Ke/ILCNN)
 > * T.F. Zhang, et al., "Cas-vit: Convolutional additive self-attention vision transformers for efficient mobile applications," _ArXiv_ ,arXiv:2408.03703, 2024.
-> * [[CAS-ViT]](https://github.com/Tianfang-Zhang/CAS-ViT)
+> [[GitHub]](https://github.com/Tianfang-Zhang/CAS-ViT)
 > * Z. Yang, et al., "Comprehensive Competition Mechanism in Palmprint Recognition," _IEEE Transactions on Information Forensics and Security_, vol. 18, pp. 5160-5170, 2023.
->[[CCNet]](https://github.com/Zi-YuanYang/CCNet)
+>[[GitHub]](https://github.com/Zi-YuanYang/CCNet)
 
