@@ -1,4 +1,4 @@
-# Competitive Lightweight Convolutional Neural Network for Finger Vein Recognition 
+# CLCNN : Competitive Lightweight Convolutional Neural Network for Finger Vein Recognition 
 
 ## Environments  
 ```
