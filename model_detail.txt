@@ -17,16 +17,6 @@
 Total params: 1,058,121
 Trainable params: 1,058,121
 Non-trainable params: 0
--------------------------------------------------------------------------
-[INFO] Register count_convNd() for <class 'torch.nn.modules.conv.Conv2d'>.
-[INFO] Register count_normalization() for <class 'torch.nn.modules.batchnorm.BatchNorm2d'>.
-[INFO] Register zero_ops() for <class 'torch.nn.modules.container.Sequential'>.
-[INFO] Register zero_ops() for <class 'torch.nn.modules.padding.ZeroPad2d'>.
-[INFO] Register count_adap_avgpool() for <class 'torch.nn.modules.pooling.AdaptiveAvgPool2d'>.
-[INFO] Register zero_ops() for <class 'torch.nn.modules.dropout.Dropout'>.
-[INFO] Register count_softmax() for <class 'torch.nn.modules.activation.Softmax'>.
-[INFO] Register count_normalization() for <class 'torch.nn.modules.batchnorm.BatchNorm1d'>.
-[INFO] Register count_linear() for <class 'torch.nn.modules.linear.Linear'>.
 FLOPs: 0.2724 GFLOPs
 Params: 1.0566 M
 Computational complexity:       265.8 MMac
