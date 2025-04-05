@@ -1,22 +1,6 @@
--------------------------------------------------------------------------
-      Layer (type)          Output Shape         Param #     Tr. Param #
-=========================================================================
-      PatchEmbed-1     [1, 32, 112, 112]             193             193
-      PatchEmbed-2       [1, 32, 56, 56]           1,440           1,440
-      BasicBlock-3       [1, 32, 56, 56]          22,752          22,752
-      PatchEmbed-4       [1, 64, 28, 28]           2,528           2,528
-      BasicBlock-5       [1, 64, 28, 28]          84,416          84,416
-      PatchEmbed-6       [1, 96, 14, 14]           7,040           7,040
-      BasicBlock-7       [1, 96, 14, 14]         184,992         184,992
-      BasicBlock-8       [1, 96, 14, 14]         184,992         184,992
-      BasicBlock-9       [1, 96, 14, 14]         184,992         184,992
-     PatchEmbed-10        [1, 128, 7, 7]          13,600          13,600
-     BasicBlock-11        [1, 128, 7, 7]         324,480         324,480
-   LinearModule-12              [1, 360]          46,696          46,696
-=========================================================================
-Total params: 1,058,121
-Trainable params: 1,058,121
-Non-trainable params: 0
-FLOPs: 0.2724 GFLOPs
-Params: 1.0566 M
-Computational complexity:       265.8 MMac
+Total params             : 1,058,121
+Trainable params         : 1,058,121
+Non-trainable params     : 0
+FLOPs                    : 0.2724 GFLOPs
+Params                   : 1.0566 M
+Computational complexity : 265.8 MMac
