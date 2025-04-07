@@ -1,4 +1,4 @@
-# CLCNN : Competitive Lightweight Convolutional Neural Network for Finger Vein Recognition 
+# LViT-CBN : A Lightweight Vision Transformer with Competitive Blocks
 
 ## Environments  
 ```
