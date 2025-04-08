@@ -1,4 +1,4 @@
-# LViT-CBN : A Lightweight Vision Transformer with Competitive Blocks
+# LViT-CB : A Lightweight Vision Transformer with Competitive Blocks
 
 ## Environments  
 ```
