@@ -8,25 +8,25 @@ conda env create -f environment.yaml
 conda activate fingervein
 ```
 
-## 1. Prepare dataset for Training and Testing
+## Prepare dataset for Training and Testing
 Get a .pkl file contain data's path 
 ```
 python 000_make_Dataset.py
 ```  
 
-## 2. Training
+## Training
 Start training the model 
 ```
 python 001_train.py
 ```
 
-## 4. Testing 
+## Testing 
 Start evaluating the model
 ```
 python 002_test.py
 ```
 
-## 5. See model's structure and details
+## Model's structure and details
 ```
 python model_detail.py
 ```
@@ -46,9 +46,6 @@ Accuracy               : 98.92
 EER (Equal Error Rate) :  1.09
 ==================================
 ```  
-
-## 6. Hardware
-The model architectures proposed in this study are implemented using the PyTorchDL framework, and training is conducted on hardware featuring an Intel® Core™ i7-12700 CPU and Nvidia RTX 4080 graphics processing unit (GPU).
 
 # References： 
 > * C.-H. Hsia, L.-Y. Ke, and S.-T. Chen, “Improved lightweight convolutional neural network for finger vein recognition system,” _Bioengineering_, vol. 10, no. 8, pp. 919, 2023.  
