@@ -1,5 +1,4 @@
 # LViT-CB : A Lightweight Vision Transformer with Competitive Blocks
-
 ![model](assets/model.png)&nbsp;
 
 ## Environments  
