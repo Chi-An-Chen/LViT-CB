@@ -3,7 +3,7 @@
 
   [[`Paper`](assets/paper.png)]
 
-  This is the official pytorch implementation of LViT-CB : A Lightweight Vision Transformer with Competitive Blocks. LViT-CB is designed to be fast, lightweight, while maintaining the quality of the biometrics.
+  This is the official pytorch implementation of LViT-CB : A Lightweight Vision Transformer with Competitive Blocks. LViT-CB is designed to be fast, lightweight, while maintaining the quality of the biometrics.  
   <img src="assets/model.png" width="35%"><br>
 
 </div>
