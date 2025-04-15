@@ -43,22 +43,6 @@ python 002_test.py
 ```
 python model_detail.py
 ```
-## Experiment Results  
-```
-==================================
-FV-USM
-Accuracy               : 99.93
-EER (Equal Error Rate) :  0.07
-----------------------------------
-PLUSVein-FV3 [LED]
-Accuracy               : 99.17
-EER (Equal Error Rate) :  1.19
-----------------------------------
-PLUSVein-FV3 [Laser]
-Accuracy               : 98.92
-EER (Equal Error Rate) :  1.09
-==================================
-```  
 
 # References： 
 > * C.-H. Hsia, L.-Y. Ke, and S.-T. Chen, “Improved lightweight convolutional neural network for finger vein recognition system,” _Bioengineering_, vol. 10, no. 8, pp. 919, 2023.  
