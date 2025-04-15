@@ -5,13 +5,8 @@
   
   This is the official pytorch implementation of LViT-CB : A Lightweight Vision Transformer with Competitive Blocks. LViT-CB is designed to be fast, lightweight, while maintaining the quality of the biometrics.  
   
-  <img src="assets/model.png" width="40%"><br><img src="assets/blk.png" width="40%"><br>
-  <div style="display: inline-block; margin: 0 10px;">
-    <img src="assets/model.png" width="300px">
-  </div>
-  <div style="display: inline-block; margin: 1 10px;">
-    <img src="assets/blk.png" width="300px">
-  </div>
+  <img src="assets/model.png" width="50%"><br>
+  <img src="assets/blk.png" width="50%"><br>
 
 </div>
 
