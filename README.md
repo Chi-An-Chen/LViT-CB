@@ -9,7 +9,7 @@
   <div style="display: inline-block; margin: 0 10px;">
     <img src="assets/model.png" width="300px">
   </div>
-  <div style="display: inline-block; margin: 0 10px;">
+  <div style="display: inline-block; margin: 1 10px;">
     <img src="assets/blk.png" width="300px">
   </div>
 
