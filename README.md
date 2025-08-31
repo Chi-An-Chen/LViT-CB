@@ -44,11 +44,18 @@ python 002_test.py
 python model_detail.py
 ```
 
-# References： 
-> * C.-H. Hsia, L.-Y. Ke, and S.-T. Chen, “Improved lightweight convolutional neural network for finger vein recognition system,” _Bioengineering_, vol. 10, no. 8, pp. 919, 2023.  
-> [[GitHub]](https://github.com/liangying-Ke/ILCNN)
-> * T.F. Zhang, et al., "Cas-vit: Convolutional additive self-attention vision transformers for efficient mobile applications," _ArXiv_ ,arXiv:2408.03703, 2024.  
-> [[GitHub]](https://github.com/Tianfang-Zhang/CAS-ViT)
-> * Z. Yang, et al., "Comprehensive Competition Mechanism in Palmprint Recognition," _IEEE Transactions on Information Forensics and Security_, vol. 18, pp. 5160-5170, 2023.  
->[[GitHub]](https://github.com/Zi-YuanYang/CCNet)
+# Citation： 
+```
+@INPROCEEDINGS{11130997,
+  author={Chen, Chi-An and Chien, Tzu-Hung and Ke, Liang-Ying and Hsia, Chih-Hsien},
+  booktitle={2025 Seventh International Symposium on Computer, Consumer and Control (IS3C)}, 
+  title={A Lightweight Vision Transformer with Competitive Blocks for Finger Vein Recognition}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-4},
+  keywords={Computer vision;Computational modeling;Biological system modeling;Fingers;Computer architecture;Transformers;Feature extraction;Computational efficiency;Security;Computational complexity;Computer Vision;Vision Transformer;Biometrics;Finger Vein},
+  doi={10.1109/IS3C65361.2025.11130997}}
+```
+
 
