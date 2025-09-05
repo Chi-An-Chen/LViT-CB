@@ -23,19 +23,19 @@ conda activate fingervein
 ```
 
 ## Prepare dataset for Training and Testing
-Get a .pkl file contain data's path 
+> Get a .pkl file contain data's path 
 ```
 python 000_make_Dataset.py
 ```  
 
 ## Training
-Start training the model 
+> Start training the model 
 ```
 python 001_train.py
 ```
 
 ## Testing 
-Start evaluating the model
+> Start evaluating the model
 ```
 python 002_test.py
 ```
