@@ -1,9 +1,9 @@
-# LViT-CB : A Lightweight Vision Transformer with Competitive Blocks
+# LViT-CB : A Lightweight Vision Transformer with Competitive Blocks for Finger Vein Recognition
 <div align="center">
 
   [[`Paper`](https://ieeexplore.ieee.org/document/11130997)]
   
-  This is the official PyTorch implementation of LViT-CB: a lightweight Vision Transformer with Competitive Blocks. LViT-CB is designed to be fast and efficient, while maintaining high biometric recognition quality.  
+  This is the official PyTorch implementation of LViT-CB: A Lightweight Vision Transformer with Competitive Blocks for Finger Vein Recognition. LViT-CB is designed to be fast and efficient, while maintaining high biometric recognition quality.  
   
   <img src="assets/model.png" width="50%"><br>
   Fig 1. Overall Architecture of LViT-CB model.  
