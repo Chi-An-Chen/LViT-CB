@@ -4,9 +4,10 @@ import random
 import pickle
 import argparse
 import traceback
+from pathlib import Path
 from tqdm import tqdm
 
-def get_argument():
+def get_argument(argv=None):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--FVUSM_split',              type=int, default=6)
 	parser.add_argument('--PLUSVein_split',           type=int, default=5)
@@ -14,10 +15,16 @@ def get_argument():
 	parser.add_argument('--FVUSM_annotation_file',    type=str, default=r'./datasets/annotations_fvusm.pkl')
 	parser.add_argument('--PLUSVein_root',            type=str, default=r'./data/PLUSVein-FV3/PLUSVein-FV3-ROI_combined/ROI')
 	parser.add_argument('--PLUSVein_annotation_file', type=str, default=r'./datasets/annotations_plusvein.pkl')
-	return parser.parse_args([])
+	parser.add_argument('--seed', type=int, default=42)
+	parser.add_argument('--datasets', choices=['FVUSM', 'PLUSVein', 'all'], default='all')
+	return parser.parse_args(argv)
 
 
 def create_FVUSM_annotation(args):
+	if args.FVUSM_split < 3:
+		raise ValueError('FVUSM_split must be at least 3.')
+	random.seed(args.seed)
+	Path(args.FVUSM_annotation_file).parent.mkdir(parents=True, exist_ok=True)
 	def iter(root, trainingSamples=[], validatingSamples=[], testingSamples=[], sub2classes={}):
 		for sub in tqdm(os.listdir(root)):
 			if not os.path.isdir(os.path.join(root, sub)):
@@ -25,6 +32,8 @@ def create_FVUSM_annotation(args):
 			paths = glob.glob(os.path.join(root, sub, '*.jpg'))
 			random.shuffle(paths)
 			breakpoints = len(paths) // args.FVUSM_split
+			if breakpoints == 0:
+				raise ValueError(f"Not enough .jpg images for splitting: {root}/{sub}")
 			forTest     = paths[:breakpoints]
 			forValidate = paths[breakpoints:breakpoints*2]
 			if sub not in sub2classes:
@@ -41,6 +50,8 @@ def create_FVUSM_annotation(args):
 	
 	trainingSamples, validatingSamples, testingSamples, sub2classes = iter(os.path.join(args.FVUSM_root, '1st_session', 'extractedvein'))
 	trainingSamples, validatingSamples, testingSamples, sub2classes = iter(os.path.join(args.FVUSM_root, '2nd_session', 'extractedvein'), trainingSamples, validatingSamples, testingSamples, sub2classes)
+	if not trainingSamples or not validatingSamples or not testingSamples:
+		raise ValueError("No complete FVUSM splits found; check the input directory layout.")
 	pickle.dump({
 		'Training_Set'  :trainingSamples, 
 		'Validating_Set':validatingSamples, 
@@ -48,6 +59,10 @@ def create_FVUSM_annotation(args):
 	}, open(args.FVUSM_annotation_file, 'wb'))
 
 def create_PLUSVein_annotation(args):
+	if args.PLUSVein_split < 3:
+		raise ValueError('PLUSVein_split must be at least 3.')
+	random.seed(args.seed)
+	Path(args.PLUSVein_annotation_file).parent.mkdir(parents=True, exist_ok=True)
 	def iter(root, Where):
 		sub2classes = {}
 		trainingSamples, validatingSamples, testingSamples = [], [], []
@@ -62,6 +77,8 @@ def create_PLUSVein_annotation(args):
 				filter_paths = [path for path in paths if identity in path]
 				random.shuffle(filter_paths)
 				breakpoints = len(filter_paths) // args.PLUSVein_split
+				if breakpoints == 0:
+					raise ValueError(f"Not enough .png images for identity {identity} in {data_path}")
 				forTest = filter_paths[:breakpoints]
 				forValidate = filter_paths[breakpoints:breakpoints*2]
 
@@ -81,6 +98,8 @@ def create_PLUSVein_annotation(args):
 		args.PLUSVein_root, os.path.join('PLUS-FV3-LED', 'PALMAR', '01'))
 	trainingSamples_LASER, validatingSamples_LASER, testingSamples_LASER = iter(
 		args.PLUSVein_root, os.path.join('PLUS-FV3-Laser', 'PALMAR', '01'))
+	if not all((trainingSamples_LED, validatingSamples_LED, testingSamples_LED, trainingSamples_LASER, validatingSamples_LASER, testingSamples_LASER)):
+		raise ValueError('No complete PLUSVein splits found; check ROI paths and filename conventions.')
 	pickle.dump({
 		'LED':{
 			'Training_Set'  :trainingSamples_LED, 
@@ -95,21 +114,17 @@ def create_PLUSVein_annotation(args):
 	}, open(args.PLUSVein_annotation_file, 'wb'))
 
 
-if __name__== '__main__':
-	args = get_argument()
-
-	print('Create FVUSM Annotation ...')
-	try:
-		create_FVUSM_annotation(args=args)
-		print('Done!\n')
-	except Exception as e:
-		print("An error occurred:")
-		traceback.print_exc()
-
-	print('Create PLUSVein Annotation ...')
-	try:
-		create_PLUSVein_annotation(args=args)
-		print('Done!\n')
-	except Exception as e:
-		print("An error occurred:")
-		traceback.print_exc()
+if __name__ == '__main__':
+    args = get_argument()
+    failed = False
+    for name, prepare in [('FVUSM', create_FVUSM_annotation), ('PLUSVein', create_PLUSVein_annotation)]:
+        if args.datasets not in ('all', name):
+            continue
+        print(f'Create {name} Annotation ...')
+        try:
+            prepare(args)
+            print('Done!')
+        except Exception:
+            traceback.print_exc()
+            failed = True
+    raise SystemExit(1 if failed else 0)

@@ -14,16 +14,29 @@ from sklearn.model_selection import KFold
 
 from models.model import CLCNN
 
-def get_argument():
+def get_argument(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasets',   type=str, default="FVUSM", choices=['FVUSM', 'PLUSVein'])
     parser.add_argument('--device',     type=str, default='cuda:0')
     parser.add_argument('--img_size',   type=int, default=112)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--workers',    type=int, default=2)
-    return parser.parse_args([])
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--annot_file', type=str, default=None)
+    parser.add_argument('--root_model', type=str, default=None)
+    parser.add_argument('--data_root', type=str, default=None,
+                        help='Optional base for relative paths inside the annotation.')
+    parser.add_argument('--classes', type=int, default=None)
+    parser.add_argument('--pad_height_width', type=int, default=None)
+    parser.add_argument('--data_type', choices=['LED', 'LASER'], default=None,
+                        help='Select one PLUSVein modality; default runs both.')
+    parser.add_argument('--checkpoint', type=str, default=None, help='Evaluate one checkpoint; default compares bestF1/bestAcc/bestLoss.')
+    parser.add_argument('--trusted_checkpoint', action='store_true', help='Allow pickle loading of your trusted legacy checkpoint.')
+    return parser.parse_args(argv)
 
 def getDatasetParams(args):
+    overrides = {key: getattr(args, key) for key in ('classes', 'pad_height_width', 'root_model', 'annot_file')}
+    modality = args.data_type
     if args.datasets == 'FVUSM':
         args.classes = 492
         args.pad_height_width = 300
@@ -39,6 +52,13 @@ def getDatasetParams(args):
         args.init_type  = 'xavier_uniform'
         args.root_model = './checkpoint_woComp/PLUSV-FV3'
         args.annot_file = './datasets/annotations_plusvein.pkl'
+    for key, value in overrides.items():
+        if value is not None:
+            setattr(args, key, value)
+    if modality is not None:
+        if args.datasets != 'PLUSVein':
+            raise ValueError('--data_type is only valid for PLUSVein.')
+        args.data_type = [modality]
     return args
 
 def _get_model(args):
@@ -50,38 +70,40 @@ def calculate_metrics(distances, labels, threshold, dist_type='cosine'):
         preds = np.greater(distances, threshold)
     elif dist_type == 'euclidean':
         preds = np.less(distances, threshold)
+    else:
+        raise ValueError('dist_type must be cosine or euclidean.')
+    tn, fp, fn, tp = skm.confusion_matrix(labels, preds, labels=[0, 1]).ravel()
+    if tn + fp == 0 or tp + fn == 0:
+        raise ValueError('Each evaluation fold needs both genuine and impostor pairs.')
+    return (float(tp + tn) / distances.size * 100,
+            float(fp) / (tn + fp) * 100,
+            float(fn) / (tp + fn) * 100)
 
-    tn, fp, fn, tp = skm.confusion_matrix(labels, preds).ravel()
-    fpr = float(fp) / (tn + fp) * 100
-    fnr = float(fn) / (tp + fn) * 100
-    acc = float(tp + tn) / distances.size * 100
-    return acc, fpr, fnr
 
-def calculate_average_metrics(dists, labels, num_folds=5):
-    dist_min, dist_max = np.min(dists), np.max(dists)
-    thresholds = np.arange(0, np.ceil(dist_max), 0.01)
-    print(f'Distance Min: {dist_min} Max: {dist_max}')
-    eer_list = []
-    acc_list = []
-    folds = KFold(n_splits=num_folds, shuffle=True)
+def calculate_average_metrics(dists, labels, num_folds=5, seed=42, dist_type='cosine'):
+    dists, labels = np.asarray(dists), np.asarray(labels)
+    if dists.ndim != 1 or labels.shape != dists.shape or len(dists) < num_folds:
+        raise ValueError('Expected matching nonempty 1-D scores and labels, with at least num_folds pairs.')
+    if not np.all(np.isfinite(dists)) or set(np.unique(labels)) != {0, 1}:
+        raise ValueError('Scores must be finite and labels must contain both 0 and 1.')
+    # Keep the original 0.01 grid; include both acceptance endpoints.
+    upper = 1.0 if dist_type == 'cosine' else float(np.ceil(np.max(dists)))
+    thresholds = np.arange(-0.01, upper + 0.02, 0.01)
+    eer_list, acc_list = [], []
+    folds = KFold(n_splits=num_folds, shuffle=True, random_state=seed)
     for train_set, test_set in folds.split(labels):
-        _acc_fold = []
-        _fpr_fold = []
-        _fnr_fold = []
-        for threshold in thresholds:
-            acc, fpr, fnr = calculate_metrics(dists[train_set], labels[train_set], threshold)
-            _acc_fold.append(acc)
-            _fpr_fold.append(fpr)
-            _fnr_fold.append(fnr)
-        eer_idx = np.nanargmin(np.absolute((np.array(_fnr_fold) - np.array(_fpr_fold))))
-        eer = (_fpr_fold[eer_idx] + _fnr_fold[eer_idx]) / 2
-
-        best_threshold = thresholds[np.argmax(_acc_fold)]
-        acc, fpr, fnr = calculate_metrics(dists[test_set], labels[test_set], best_threshold)
-
-        eer_list.append(eer)
+        calibration = [calculate_metrics(dists[train_set], labels[train_set], t, dist_type)
+                       for t in thresholds]
+        best_threshold = thresholds[np.argmax([m[0] for m in calibration])]
+        acc, _, _ = calculate_metrics(dists[test_set], labels[test_set], best_threshold, dist_type)
+        # EER describes the held-out fold ROC, not a deployment threshold.
+        held_out = np.array([calculate_metrics(dists[test_set], labels[test_set], t, dist_type)
+                             for t in thresholds])
+        eer_idx = np.argmin(np.abs(held_out[:, 1] - held_out[:, 2]))
+        eer_list.append(float((held_out[eer_idx, 1] + held_out[eer_idx, 2]) / 2))
         acc_list.append(acc)
     return np.mean(acc_list), np.mean(eer_list)
+
 
 def evaluate(*kwargs):
     args = kwargs[0]
@@ -127,11 +149,11 @@ def evaluate(*kwargs):
     embeds_list = np.array(embeds_list)
     targets_list = np.array(targets_list)
 
-    for embed_A, target_A in tzip(embeds_list, targets_list):
-        for embed_B, target_B in zip(embeds_list, targets_list):
+    for i, (embed_A, target_A) in enumerate(tzip(embeds_list, targets_list)):
+        for embed_B, target_B in zip(embeds_list[i + 1:], targets_list[i + 1:]):
             if dist_type == 'cosine':
                 dist = np.dot(embed_A, embed_B) / (np.linalg.norm(embed_A) * np.linalg.norm(embed_B))
-                dist = (dist + 1) / 2
+                dist = np.clip((dist + 1) / 2, 0.0, 1.0)
             elif dist_type == 'euclidean':
                 dist = np.sum((embed_A - embed_B) ** 2) ** 0.5
 
@@ -141,38 +163,44 @@ def evaluate(*kwargs):
     dists = np.array(dists, dtype=np.float32)
     labels = np.array(labels, dtype=np.float32)
 
-    dists_1 = dists[labels==1]
-    dists_2 = dists[labels==0]
-    random.shuffle(dists_2)
-    dists_2 = dists_2[:len(dists_1)]
+    dists_1 = dists[labels == 1]
+    dists_2 = dists[labels == 0]
+    if not len(dists_1) or len(dists_2) < len(dists_1):
+        raise ValueError('Need genuine pairs and at least as many impostor pairs. Provide multiple classes with multiple evaluation images.')
+    rng = np.random.default_rng(args.seed)
+    dists_2 = rng.choice(dists_2, size=len(dists_1), replace=False)
     dists = np.hstack([dists_1, dists_2])
-
-    labels_1 = labels[labels==1]
-    labels_2 = labels[labels==0]
-    random.shuffle(labels_2)
-    labels_2 = labels_2[:len(labels_1)]
-    labels = np.hstack([labels_1, labels_2])
-
-    avg_acc, eer = calculate_average_metrics(dists, labels)
+    labels = np.hstack([np.ones(len(dists_1)), np.zeros(len(dists_2))])
+    avg_acc, eer = calculate_average_metrics(dists, labels, seed=args.seed, dist_type=dist_type)
     acc = skm.accuracy_score(targets_list, outputs_list) * 100
     return eer, acc, avg_acc
 
-def main(args, database_results={}):
+def main(args, database_results=None):
+    if database_results is None:
+        database_results = {}
+    if args.checkpoint and len(args.data_type) != 1:
+        raise ValueError("Select --data_type LED or LASER when using --checkpoint with PLUSVein.")
     print(f'Using {args.datasets} dataset for testing ...')
     for data_type in args.data_type:
         print(f'Testing data type : {data_type} ...')
+        path = os.path.join(args.root_model, str(data_type))
+        candidates = [('provided', args.checkpoint)] if args.checkpoint else [
+            (metric, os.path.join(path, f'Backbone_ckpt.best{metric}.pth.tar'))
+            for metric in ('F1', 'Acc', 'Loss')]
+        for _, filename in candidates:
+            if not os.path.isfile(filename):
+                raise FileNotFoundError(f'Checkpoint not found: {filename}. Train first or use --checkpoint.')
         test_dataset = datasets.ImagesDataset(args=args, data_type=data_type, phase='test')
-        test_DataLoader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, persistent_workers=True, pin_memory=True)
+        test_DataLoader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, persistent_workers=args.workers > 0, pin_memory=True)
         valid_dataset = datasets.ImagesDataset(args=args, data_type=data_type, phase='val')
-        valid_DataLoader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, persistent_workers=True, pin_memory=True)
+        valid_DataLoader = torch.utils.data.DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers, persistent_workers=args.workers > 0, pin_memory=True)
         
         model = _get_model(args)
         model.eval()
 
         best_eer = float('inf')
-        for metrics in ['F1', 'Acc', 'Loss']:
-            path = os.path.join(args.root_model, str(data_type)) 
-            weights = torch.load(os.path.join(path, f"Backbone_ckpt.best{metrics}.pth.tar"), weights_only=False)
+        for metrics, filename in candidates:
+            weights = load_checkpoint(filename, args.device, args.trusted_checkpoint)
             model.load_state_dict(weights['model_state_dict'])
 
             dist_type='cosine'
@@ -199,5 +227,7 @@ if __name__ == '__main__':
     database_results = {}
     args = get_argument()
     args = getDatasetParams(args)
+    configure_cuda(args)
+    seed_everything(args.seed)
     database_results = main(args)
     print(database_results)

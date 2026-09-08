@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+.env
+/data/*
+!/data/data.txt
+/checkpoint/*
+!/checkpoint/checkpoints.txt
+/checkpoint_woComp/
+/datasets/*.pkl
+*.pth
+*.pth.tar
+*.pt
+/outputs/

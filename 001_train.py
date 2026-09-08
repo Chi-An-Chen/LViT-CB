@@ -14,12 +14,12 @@ from models.model import CLCNN
 from models.loss import CombineLoss
 
 
-def get_argument():
+def get_argument(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasets',   type=str, default="FVUSM", choices=['FVUSM', 'PLUSVein'])
     parser.add_argument('--device',     type=str, default='cuda:0')
-    parser.add_argument('--optim',      type=str, default="adamw")
-    parser.add_argument('--scheduler',  type=str, default='Cosine')
+    parser.add_argument('--optim',      type=str, default="adamw", choices=["adamw", "sgd"])
+    parser.add_argument('--scheduler',  type=str, default='Cosine', choices=['Cosine', 'ReduceLROnPlateau', ''])
     parser.add_argument('--workers',    type=int, default=2)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--img_size',   type=int, default=112)
@@ -27,10 +27,21 @@ def get_argument():
     
     parser.add_argument('--arcface_weight', type=float, default=0.1)
     parser.add_argument('--center_weight',  type=float, default=0.01)
-    return parser.parse_args([])
+    parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--annot_file', type=str, default=None)
+    parser.add_argument('--root_model', type=str, default=None)
+    parser.add_argument('--data_root', type=str, default=None,
+                        help='Optional base for relative paths inside the annotation.')
+    parser.add_argument('--classes', type=int, default=None)
+    parser.add_argument('--pad_height_width', type=int, default=None)
+    parser.add_argument('--data_type', choices=['LED', 'LASER'], default=None,
+                        help='Select one PLUSVein modality; default runs both.')
+    return parser.parse_args(argv)
 
 
 def getDatasetParams(args):
+    overrides = {key: getattr(args, key) for key in ('classes', 'pad_height_width', 'root_model', 'annot_file')}
+    modality = args.data_type
     if args.datasets == 'FVUSM':
         args.classes = 492
         args.pad_height_width = 300
@@ -46,6 +57,13 @@ def getDatasetParams(args):
         args.init_type  = 'xavier_uniform'
         args.root_model = './checkpoint_woComp/PLUSV-FV3'
         args.annot_file = './datasets/annotations_plusvein.pkl'
+    for key, value in overrides.items():
+        if value is not None:
+            setattr(args, key, value)
+    if modality is not None:
+        if args.datasets != 'PLUSVein':
+            raise ValueError('--data_type is only valid for PLUSVein.')
+        args.data_type = [modality]
     return args
 
 def getOptimParams(args):
@@ -76,7 +94,7 @@ def _get_optimizer(args, model):
     if args.scheduler == 'Cosine':
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=optimizer, T_max=args.T_max, eta_min=args.eta_min)
     elif args.scheduler == 'ReduceLROnPlateau':
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=args.factor, patience=args.patience, verbose=args.verbose)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer, mode='min', factor=args.factor, patience=args.patience)
     else:
         scheduler = None
 
@@ -163,15 +181,19 @@ def Learning(*kwargs):
 
 
 def main(args):
+    if args.batch_size < 2:
+        raise ValueError("Training batch_size must be at least 2 for BatchNorm.")
     for data_type in args.data_type:
         train_dataset = datasets.ImagesDataset(args=args, data_type=data_type, phase='train')
         val_dataset   = datasets.ImagesDataset(args=args, data_type=data_type, phase='val')
 
-        Train_DataLoader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, persistent_workers=True, pin_memory=True, drop_last=True)
-        Val_DataLoader   = torch.utils.data.DataLoader(val_dataset,   batch_size=args.batch_size, shuffle=True, num_workers=args.workers, persistent_workers=True, pin_memory=True)
+        Train_DataLoader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers, persistent_workers=args.workers > 0, pin_memory=True, drop_last=True)
+        Val_DataLoader   = torch.utils.data.DataLoader(val_dataset,   batch_size=args.batch_size, shuffle=True, num_workers=args.workers, persistent_workers=args.workers > 0, pin_memory=True)
         
         args.max_iteration_train = len(Train_DataLoader)
         args.max_iteration_val   = len(Val_DataLoader)
+        if not args.max_iteration_train:
+            raise ValueError('Training set is smaller than batch_size; lower --batch_size (at least 2).')
 
         best_loss = float(' inf')
         best_acc  = float('-inf')
@@ -202,7 +224,7 @@ def main(args):
 
             if args.scheduler == 'ReduceLROnPlateau':
                 scheduler.step(loss)
-            elif args.scheduler != '':
+            elif scheduler is not None:
                 scheduler.step()
 
             is_bestLoss = loss < best_loss
@@ -218,9 +240,14 @@ def main(args):
                 os.makedirs(save_path)
 
             save_checkpoint(os.path.join(save_path, f"Backbone_ckpt.pth.tar"), {
-                'args': args,
-                'Accuracy': acc,
-                'F1-Score': f1,
+                'args': vars(args).copy(),
+                'preprocessing': {
+                    'mean': train_dataset.mean.tolist(), 'std': train_dataset.std.tolist(),
+                    'img_size': args.img_size, 'pad_height_width': args.pad_height_width,
+                    'classes': args.classes, 'datasets': args.datasets, 'data_type': data_type,
+                },
+                'Accuracy': float(acc),
+                'F1-Score': float(f1),
                 'model_state_dict': model.state_dict(),
             }, is_bestF1, is_bestAcc, is_bestLoss)
             print('='*100)
@@ -242,4 +269,6 @@ if __name__ == '__main__':
     args = get_argument()
     args = getOptimParams(args)
     args = getDatasetParams(args)
+    configure_cuda(args)
+    seed_everything(args.seed)
     main(args)
