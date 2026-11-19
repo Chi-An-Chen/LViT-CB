@@ -4,7 +4,11 @@
 
 Official PyTorch implementation of our IS3C 2025 paper.
 
-[Project page](https://chi-an-chen.github.io/LViT-CB/) · [Paper](https://ieeexplore.ieee.org/document/11130997) · [Installation](#installation) · [Dataset preparation](#dataset-preparation) · [Training](#training) · [Evaluation](#evaluation) · [Inference](#inference) · [Citation](#citation)
+| Topic | Links |
+| --- | --- |
+| Research | [Project page](https://chi-an-chen.github.io/LViT-CB/) · [Paper](https://ieeexplore.ieee.org/document/11130997) · [Citation](#citation) |
+| Getting started | [Installation](#installation) · [Dataset preparation](#dataset-preparation) |
+| Using the model | [Training](#training) · [Evaluation](#evaluation) · [Inference](#inference) |
 
 LViT-CB combines lightweight vision transformers with competitive blocks for finger-vein recognition. The model extracts image features and predicts finger identities. Its implementation is named `CLCNN` in the source code.
 
