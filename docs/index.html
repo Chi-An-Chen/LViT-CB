@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbfaf7">
+  <meta name="description" content="LViT-CB combines a lightweight vision transformer with competitive blocks for finger vein recognition. Explore the model, IS3C 2025 results and PyTorch implementation.">
+  <title>LViT-CB · Finger Vein Recognition</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="site.js"></script>
+</head>
+<body id="top">
+  <a class="skip" href="#overview">Skip to overview</a>
+  <header class="site-head"><div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="LViT-CB, back to top"><span class="mark" aria-hidden="true"></span>LViT-CB</a>
+    <nav aria-label="Sections"><a href="#overview">Overview</a><a href="#method">Method</a><a href="#results">Results</a><a href="#citation">Citation</a></nav>
+  </div><div class="progress" aria-hidden="true"></div></header>
+  <main>
+    <section id="overview" class="wrap overview">
+      <div class="hero">
+        <div>
+          <p class="eyebrow"><span class="rule"></span>IS3C 2025</p>
+          <h1>A Lightweight Vision Transformer with <em>Competitive Blocks</em> for Finger Vein Recognition</h1>
+          <p class="authors">Chi-An Chen<sup>1</sup>, Tzu-Hung Chien<sup>2</sup>, Liang-Ying Ke<sup>3</sup>, Chih-Hsien Hsia<sup>1</sup></p>
+          <p class="affiliations"><span>¹ National Ilan University</span><span>² Taipei American School</span><span>³ National Cheng Kung University</span></p>
+          <div class="actions"><a class="button primary" href="https://doi.org/10.1109/IS3C65361.2025.11130997">Read paper</a><a class="button" href="https://github.com/Chi-An-Chen/LViT-CB">View code</a></div>
+        </div>
+        <dl class="metrics" aria-label="Model statistics reported in the paper">
+          <div><dt>Model parameters</dt><dd>1.06<span>M</span></dd></div>
+          <div><dt>Compute per input</dt><dd>0.27<span>GFLOPs</span></dd></div>
+          <div><dt>Identification rate · FV-USM</dt><dd>99.93<span>%</span></dd></div>
+        </dl>
+      </div>
+      <figure class="arch">
+        <figcaption><strong>Model architecture</strong><a href="figures/model.webp" aria-label="Open full-size model architecture">Full size</a></figcaption>
+        <a href="figures/model.webp"><img src="figures/model.webp" width="5023" height="1466" alt="Finger vein input passes through patch embedding, four feature competition blocks, then a linear classifier."></a>
+      </figure>
+    </section>
+    <section id="method" class="section tinted"><div class="wrap">
+      <p class="eyebrow">Method</p>
+      <h2>How vein features compete</h2>
+      <p class="intro">A convolutional layer turns a finger vein image into patches. Across four stages, LViT-CB reduces their spatial resolution and increases the channel count. Within each stage, a competitive block selects salient responses before attention mixes information across patches.</p>
+      <div class="methods">
+        <article><h3>Two paths through the block</h3>
+          <a class="diagram" href="figures/blk_1.webp" aria-label="Open full-size competitive block diagram"><img loading="lazy" src="figures/blk_1.webp" width="4079" height="1109" alt="One branch applies competition directly. A second applies convolution before competition."></a>
+          <p>One branch compares the incoming features directly. The other first uses a 3 × 3 convolution to capture local vein patterns. The block concatenates both outputs and uses a 1 × 1 convolution to restore the channel count.</p></article>
+        <article><h3>Competition across three axes</h3>
+          <a class="diagram" href="figures/blk_2.webp" aria-label="Open full-size competition module diagram"><img loading="lazy" src="figures/blk_2.webp" width="4079" height="1109" alt="The competition module combines softmax responses along the channel, height and width axes."></a>
+          <p>Each branch applies softmax separately across channels, rows and columns. A weighted sum combines the three responses, giving each feature a score relative to its neighbors along each axis.</p></article>
+      </div>
+    </div></section>
+    <section id="results" class="section wrap">
+      <p class="eyebrow">Results</p>
+      <h2>What the competitive block adds</h2>
+      <p class="intro">On PLUSVein-FV3 LED, adding the block increased the correct identification rate from 98.57% to 99.17% and reduced the equal error rate from 1.74% to 1.19%.</p>
+      <div class="table-scroll" role="region" aria-label="Ablation results, scroll horizontally on small screens" tabindex="0">
+        <table><caption>Competitive block ablation · paper-reported results</caption><thead>
+          <tr><th rowspan="2" scope="col">Dataset</th><th colspan="2" scope="colgroup">CIR (%) ↑</th><th colspan="2" scope="colgroup">EER (%) ↓</th></tr>
+          <tr><th scope="col">Without CB</th><th class="with" scope="col">With CB</th><th scope="col">Without CB</th><th class="with" scope="col">With CB</th></tr>
+        </thead><tbody>
+          <tr><th scope="row">FV-USM</th><td>99.90</td><td class="with">99.93</td><td>0.13</td><td class="with">0.06<sup><a href="#eer-note" aria-label="Read note on FV-USM EER">*</a></sup></td></tr>
+          <tr><th scope="row">PLUSVein-FV3 · LED</th><td>98.57</td><td class="with">99.17</td><td>1.74</td><td class="with">1.19</td></tr>
+          <tr><th scope="row">PLUSVein-FV3 · Laser</th><td>98.40</td><td class="with">98.92</td><td>1.83</td><td class="with">1.09</td></tr>
+        </tbody></table>
+      </div>
+      <p class="note">Higher CIR means more fingers were correctly identified. Lower EER means fewer errors at the threshold where false acceptance and false rejection rates are equal. Results are from Tables IV and V, using palmar images for both PLUSVein-FV3 subsets.</p>
+      <p class="note" id="eer-note"><strong>* FV-USM EER.</strong> The abstract and Table IV report 0.06%. Table I lists 0.07% for the same model.</p>
+    </section>
+    <section id="citation" class="section tinted"><div class="wrap resources">
+      <div><p class="eyebrow">Code &amp; citation</p><h2>Use this work</h2>
+        <p>The official PyTorch implementation includes dataset preparation, training and evaluation.</p>
+        <div class="resource-links"><a href="https://github.com/Chi-An-Chen/LViT-CB#installation">Installation</a><a href="https://github.com/Chi-An-Chen/LViT-CB#evaluation">Evaluation protocol</a></div>
+      </div>
+      <div class="cite"><div class="cite-head"><strong>BibTeX</strong><button type="button" id="copy" hidden>Copy citation</button><span class="sr" id="copy-status" role="status"></span></div>
+      <pre><code id="bibtex">@INPROCEEDINGS{11130997,
+  author={Chen, Chi-An and Chien, Tzu-Hung and Ke, Liang-Ying and Hsia, Chih-Hsien},
+  booktitle={2025 Seventh International Symposium on Computer, Consumer and Control (IS3C)},
+  title={A Lightweight Vision Transformer with Competitive Blocks for Finger Vein Recognition},
+  year={2025},
+  pages={1-4},
+  doi={10.1109/IS3C65361.2025.11130997}
+}</code></pre></div>
+    </div></section>
+  </main>
+  <footer class="wrap"><span>LViT-CB · IS3C 2025</span><a href="#top">Back to top</a></footer>
+</body>
+</html>
